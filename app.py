@@ -2297,18 +2297,18 @@ def login_user(user: UserLogin):
             status_code=401,
             detail="Invalid email or password"
         )
+    access_token = create_access_token(
+        {"sub": str(existing_user["id"])}
+)
 
     return {
-
         "message": "Login successful",
-
+        "access_token": access_token,
+        "token_type": "bearer",
         "user_id": existing_user["id"],
-
         "name": existing_user["name"],
-
         "email": existing_user["email"]
-
-    }
+}
 # =========================
 # JWT AUTHENTICATION
 # =========================
