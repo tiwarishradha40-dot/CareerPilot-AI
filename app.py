@@ -2298,7 +2298,8 @@ def login_user(user: UserLogin):
             detail="Invalid email or password"
         )
     access_token = create_access_token(
-        {"sub": str(existing_user["id"])}
+        {existing_user["id"],
+         existing_user["email"]}
 )
 
     return {
