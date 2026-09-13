@@ -1,0 +1,2048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CareerPilot AI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f5f7fb;
+            color: #172033;
+        }
+
+        .navbar {
+            height: 70px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .logo span {
+            color: #6366f1;
+        }
+
+        .user-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logout {
+            border: none;
+            background: #111827;
+            color: white;
+            padding: 9px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .layout {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        .sidebar {
+            width: 230px;
+            background: #111827;
+            color: white;
+            padding: 25px 15px;
+        }
+
+        .sidebar h3 {
+            margin-bottom: 25px;
+            padding-left: 10px;
+        }
+
+        .menu {
+            padding: 13px 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .menu:hover,
+        .menu.active {
+            background: #6366f1;
+        }
+
+        .main {
+            flex: 1;
+            padding: 35px;
+        }
+
+        .welcome {
+            margin-bottom: 25px;
+        }
+
+        .welcome h1 {
+            font-size: 30px;
+            margin-bottom: 7px;
+        }
+
+        .welcome p {
+            color: #6b7280;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 22px;
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .card-title {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .card-value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: white;
+            padding: 25px;
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .panel h2 {
+            margin-bottom: 20px;
+        }
+
+        .profile-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .profile-row:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            color: #6b7280;
+        }
+
+        .score {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .score-number {
+            font-size: 55px;
+            font-weight: 800;
+            color: #6366f1;
+        }
+
+        .progress {
+            height: 10px;
+            background: #e5e7eb;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: #6366f1;
+        }
+
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f5f7fb;
+        }
+
+        .login-box {
+            width: 400px;
+            background: white;
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.08);
+        }
+
+        .login-box h1 {
+            margin-bottom: 8px;
+        }
+
+        .login-box p {
+            color: #6b7280;
+            margin-bottom: 25px;
+        }
+
+        .input {
+            width: 100%;
+            padding: 13px;
+            margin-bottom: 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 8px;
+            background: #6366f1;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .error {
+            color: #dc2626;
+            margin-top: 12px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 900px) {
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                width: 190px;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+            }
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .main {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="app"></div>
+
+<script>
+
+const app = document.getElementById("app");
+
+function showLogin() {
+
+    app.innerHTML = `
+        <div class="login-page">
+
+            <div class="login-box">
+
+                <h1>CareerPilot <span style="color:#6366f1;">AI</span></h1>
+
+                <p>Your personalized career preparation platform.</p>
+
+                <input
+                    id="email"
+                    class="input"
+                    type="email"
+                    placeholder="Email"
+                >
+
+                <input
+                    id="password"
+                    class="input"
+                    type="password"
+                    placeholder="Password"
+                >
+
+                <button class="login-btn" onclick="login()">
+                    Login
+                </button>
+
+                <div id="error" class="error"></div>
+
+            </div>
+
+        </div>
+    `;
+}
+
+
+async function login() {
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    const error = document.getElementById("error");
+
+    error.innerText = "";
+
+    try {
+
+        const response = await fetch("/auth/token", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                email: email,
+                password: password
+            })
+
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            error.innerText =
+                data.detail || "Login failed";
+
+            return;
+        }
+
+        localStorage.setItem(
+            "careerpilot_token",
+            data.access_token
+        );
+
+        loadDashboard();
+
+    } catch (err) {
+
+        error.innerText =
+            "Server connection failed.";
+
+    }
+}
+
+
+async function loadDashboard() {
+
+    const token =
+        localStorage.getItem("careerpilot_token");
+
+    if (!token) {
+
+        showLogin();
+
+        return;
+    }
+
+    try {
+
+        const response = await fetch("/dashboard", {
+
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            localStorage.removeItem("careerpilot_token");
+
+            showLogin();
+
+            return;
+        }
+
+        renderDashboard(data);
+
+    } catch (err) {
+
+        showLogin();
+
+    }
+}
+
+
+function renderDashboard(data) {
+
+    const student = data.student;
+
+    app.innerHTML = `
+
+        <div class="navbar">
+
+            <div class="logo">
+                CareerPilot <span>AI</span>
+            </div>
+
+            <div class="user-area">
+
+                <span>${student.name}</span>
+
+                <button
+                    class="logout"
+                    onclick="logout()">
+                    Logout
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="layout">
+
+            <aside class="sidebar">
+
+                <h3>CareerPilot</h3>
+
+                <div class="menu active">
+                    🏠 Dashboard
+                </div>
+
+                <div class="menu" onclick="showRoadmap()">
+                    🎯 Career Roadmap
+                </div>
+
+                <div class="menu" onclick="showDSA()">
+                    🧠 DSA Practice
+                </div>
+
+                <div class="menu">
+                    📚 Study Plan
+                </div>
+
+                <div class="menu" onclick="showJobs()">
+                    💼 Job Applications
+                </div>
+
+                <div class="menu" onclick="showReadiness()">
+                    📊 Readiness Score
+                </div>
+
+                <div class="menu">
+                    👤 Profile
+                </div>
+
+            </aside>
+
+
+            <main class="main">
+
+                <div class="welcome">
+
+                    <h1>
+                        Welcome back, ${student.name.split(" ")[0]} 👋
+                    </h1>
+
+                    <p>
+                        Let's move one step closer to your dream career.
+                    </p>
+
+                </div>
+
+
+                <div class="cards">
+
+                    <div class="card">
+
+                        <div class="card-title">
+                            Target Role
+                        </div>
+
+                        <div class="card-value"
+                             style="font-size:19px;">
+                            ${student.target_role}
+                        </div>
+
+                    </div>
+
+
+                    <div class="card">
+
+                        <div class="card-title">
+                            Target Company
+                        </div>
+
+                        <div class="card-value"
+                             style="font-size:24px;">
+                            ${student.target_company || "Not set"}
+                        </div>
+
+                    </div>
+
+
+                    <div class="card">
+
+                        <div class="card-title">
+                            DSA Solved
+                        </div>
+
+                        <div class="card-value">
+                            ${data.dsa.solved}
+                        </div>
+
+                    </div>
+
+
+                    <div class="card">
+
+                        <div class="card-title">
+                            Job Applications
+                        </div>
+
+                        <div class="card-value">
+                            ${data.jobs.total_applications}
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="content-grid">
+
+                    <div class="panel">
+
+                        <h2>👤 Your Career Profile</h2>
+
+                        <div class="profile-row">
+                            <span class="label">Degree</span>
+                            <strong>${student.degree}</strong>
+                        </div>
+
+                        <div class="profile-row">
+                            <span class="label">Branch</span>
+                            <strong>${student.branch}</strong>
+                        </div>
+
+                        <div class="profile-row">
+                            <span class="label">Graduation Year</span>
+                            <strong>${student.graduation_year}</strong>
+                        </div>
+
+                        <div class="profile-row">
+                            <span class="label">Skills</span>
+                            <strong>${student.skills}</strong>
+                        </div>
+
+                        <div class="profile-row">
+                            <span class="label">Daily Study Time</span>
+                            <strong>${student.daily_study_hours} hours</strong>
+                        </div>
+
+                    </div>
+
+
+                    <div class="panel">
+
+                        <h2>📊 DSA Progress</h2>
+
+                        <div class="score">
+
+                            <div class="score-number">
+                                ${data.dsa.solved}
+                            </div>
+
+                            <p>
+                                Problems Solved
+                            </p>
+
+                            <div class="progress">
+
+                                <div
+                                    class="progress-bar"
+                                    style="width:${Math.min(
+                                        data.dsa.solved * 5,
+                                        100
+                                    )}%">
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </main>
+
+        </div>
+    `;
+}
+
+function showRoadmap() {
+
+    app.innerHTML = `
+
+        <div class="navbar">
+
+            <div class="logo">
+                CareerPilot <span>AI</span>
+            </div>
+
+            <div class="user-area">
+
+                <span>Career Roadmap</span>
+
+                <button
+                    class="logout"
+                    onclick="loadDashboard()">
+                    Dashboard
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="layout">
+
+            <aside class="sidebar">
+
+                <h3>CareerPilot</h3>
+
+                <div class="menu"
+                     onclick="loadDashboard()">
+                    🏠 Dashboard
+                </div>
+
+                <div class="menu active">
+                    🎯 Career Roadmap
+                </div>
+
+                <div class="menu">
+                    🧠 DSA Practice
+                </div>
+
+                <div class="menu">
+                    📚 Study Plan
+                </div>
+
+                <div class="menu">
+                    💼 Job Applications
+                </div>
+
+                <div class="menu">
+                    📊 Readiness Score
+                </div>
+
+                <div class="menu">
+                    👤 Profile
+                </div>
+
+            </aside>
+
+
+            <main class="main">
+
+                <div class="welcome">
+
+                    <h1>🎯 Your Career Roadmap</h1>
+
+                    <p>
+                        Your personalized path to becoming
+                        a Software Development Engineer.
+                    </p>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <h2>🚀 Software Development Engineer</h2>
+
+                    <p style="color:#6b7280; margin-bottom:25px;">
+                        Target Company: <strong>Amazon</strong>
+                    </p>
+
+
+                    <div class="profile-row">
+                        <span>🐍 Python</span>
+                        <strong>Foundation</strong>
+                    </div>
+
+                    <div class="profile-row">
+                        <span>🧠 Data Structures & Algorithms</span>
+                        <strong>In Progress</strong>
+                    </div>
+
+                    <div class="profile-row">
+                        <span>💻 OOP + Core CS</span>
+                        <strong>Upcoming</strong>
+                    </div>
+
+                    <div class="profile-row">
+                        <span>🗄️ SQL & Databases</span>
+                        <strong>In Progress</strong>
+                    </div>
+
+                    <div class="profile-row">
+                        <span>⚡ Backend Development</span>
+                        <strong>In Progress</strong>
+                    </div>
+
+                    <div class="profile-row">
+                        <span>🏗️ Projects</span>
+                        <strong>In Progress</strong>
+                    </div>
+
+                    <div class="profile-row">
+                        <span>🏛️ System Design</span>
+                        <strong>Upcoming</strong>
+                    </div>
+
+                    <div class="profile-row">
+                        <span>🎤 Interview Preparation</span>
+                        <strong>Upcoming</strong>
+                    </div>
+
+                    <div class="profile-row">
+                        <span>🏆 Job Ready</span>
+                        <strong>Target</strong>
+                    </div>
+
+                </div>
+
+            </main>
+
+        </div>
+    `;
+}
+async function showDSA() {
+
+    const token = localStorage.getItem("careerpilot_token");
+
+    if (!token) {
+        showLogin();
+        return;
+    }
+
+    try {
+
+        const dashboardResponse = await fetch("/dashboard", {
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        });
+
+        const dashboard = await dashboardResponse.json();
+
+        if (!dashboardResponse.ok || !dashboard.student) {
+            alert("Student profile not found.");
+            return;
+        }
+
+        const studentId = dashboard.student.id;
+
+        const dsaResponse = await fetch(
+            `/students/${studentId}/dsa`,
+            {
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            }
+        );
+
+        const dsaData = await dsaResponse.json();
+const attempts = dsaData.attempts || [];
+
+        app.innerHTML = `
+
+            <div class="navbar">
+
+                <div class="logo">
+                    CareerPilot <span>AI</span>
+                </div>
+
+                <div class="user-area">
+
+                    <span>DSA Practice</span>
+
+                    <button
+                        class="logout"
+                        onclick="loadDashboard()">
+                        Dashboard
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="layout">
+
+                <aside class="sidebar">
+
+                    <h3>CareerPilot</h3>
+
+                    <div class="menu"
+                         onclick="loadDashboard()">
+                        🏠 Dashboard
+                    </div>
+
+                    <div class="menu">
+                        🎯 Career Roadmap
+                    </div>
+
+                    <div class="menu active">
+                        🧠 DSA Practice
+                    </div>
+
+                    <div class="menu" onclick="showStudyPlan()">
+                        📚 Study Plan
+                    </div>
+
+                    <div class="menu">
+                        💼 Job Applications
+                    </div>
+
+                    <div class="menu">
+                        📊 Readiness Score
+                    </div>
+
+                    <div class="menu">
+                        👤 Profile
+                    </div>
+
+                </aside>
+
+
+                <main class="main">
+
+                    <div class="welcome">
+
+                        <h1>🧠 DSA Practice</h1>
+
+                        <p>
+                            Track your problem-solving journey
+                            and identify your weak topics.
+                        </p>
+
+                    </div>
+
+
+                    <div class="cards">
+
+                        <div class="card">
+
+                            <div class="card-title">
+                                Total Attempts
+                            </div>
+
+                            <div class="card-value"
+                                 id="totalAttempts">
+                                ${attempts.length}
+                            </div>
+
+                        </div>
+
+
+                        <div class="card">
+
+                            <div class="card-title">
+                                Solved
+                            </div>
+
+                            <div class="card-value"
+                                 id="solvedCount">
+                                ${
+                                    attempts.filter(
+                                        a => a.status === "Solved"
+                                    ).length
+                                }
+                            </div>
+
+                        </div>
+
+
+                        <div class="card">
+
+                            <div class="card-title">
+                                Failed
+                            </div>
+
+                            <div class="card-value">
+                                ${
+                                    attempts.filter(
+                                        a => a.status === "Failed"
+                                    ).length
+                                }
+                            </div>
+
+                        </div>
+
+
+                        <div class="card">
+
+                            <div class="card-title">
+                                Topics Practiced
+                            </div>
+
+                            <div class="card-value">
+                                ${
+                                    new Set(
+                                        attempts.map(a => a.topic)
+                                    ).size
+                                }
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="panel">
+
+                        <h2>➕ Add DSA Attempt</h2>
+
+                        <input
+                            id="dsaQuestion"
+                            class="input"
+                            placeholder="Question name"
+                        >
+
+                        <input
+                            id="dsaTopic"
+                            class="input"
+                            placeholder="Topic e.g. Array, String, Tree"
+                        >
+
+                        <select
+                            id="dsaDifficulty"
+                            class="input">
+
+                            <option value="Easy">
+                                Easy
+                            </option>
+
+                            <option value="Medium">
+                                Medium
+                            </option>
+
+                            <option value="Hard">
+                                Hard
+                            </option>
+
+                        </select>
+
+
+                        <select
+                            id="dsaStatus"
+                            class="input">
+
+                            <option value="Solved">
+                                Solved
+                            </option>
+
+                            <option value="Failed">
+                                Failed
+                            </option>
+
+                            <option value="Attempted">
+                                Attempted
+                            </option>
+
+                        </select>
+
+
+                        <input
+                            id="dsaTime"
+                            class="input"
+                            type="number"
+                            min="1"
+                            placeholder="Time taken (minutes)"
+                        >
+
+
+                        <input
+                            id="dsaAttempt"
+                            class="input"
+                            type="number"
+                            min="1"
+                            value="1"
+                            placeholder="Attempt number"
+                        >
+
+
+                        <button
+                            class="login-btn"
+                            onclick="addDSAAttempt()">
+
+                            Save DSA Attempt
+
+                        </button>
+
+                        <div
+                            id="dsaMessage"
+                            style="margin-top:15px;">
+                        </div>
+
+                    </div>
+
+
+                    <div class="panel"
+                         style="margin-top:20px;">
+
+                        <h2>📋 Practice History</h2>
+
+                        <div id="dsaHistory">
+
+                            ${
+                                attempts.length === 0
+
+                                ? `
+                                    <p style="color:#6b7280;">
+                                        No DSA attempts yet.
+                                        Start solving your first problem!
+                                    </p>
+                                  `
+
+                                : attempts.map(a => `
+
+                                    <div class="profile-row">
+
+                                        <span>
+                                            <strong>
+                                                ${a.question}
+                                            </strong>
+                                            <br>
+
+                                            <small>
+                                                ${a.topic}
+                                                ·
+                                                ${a.difficulty}
+                                                ·
+                                                ${a.time_taken_minutes} min
+                                            </small>
+                                        </span>
+
+                                        <strong>
+                                            ${a.status}
+                                        </strong>
+
+                                    </div>
+
+                                `).join("")
+                            }
+
+                        </div>
+
+                    </div>
+
+                </main>
+
+            </div>
+        `;
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Unable to load DSA practice.");
+
+    }
+}
+
+
+async function addDSAAttempt() {
+
+    const token =
+        localStorage.getItem("careerpilot_token");
+
+    const dashboardResponse = await fetch(
+        "/dashboard",
+        {
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        }
+    );
+
+    const dashboard =
+        await dashboardResponse.json();
+
+    const studentId =
+        dashboard.student.id;
+
+
+    const question =
+        document.getElementById("dsaQuestion").value;
+
+    const topic =
+        document.getElementById("dsaTopic").value;
+
+    const difficulty =
+        document.getElementById("dsaDifficulty").value;
+
+    const status =
+        document.getElementById("dsaStatus").value;
+
+    const timeTaken =
+        Number(
+            document.getElementById("dsaTime").value
+        );
+
+    const attemptNumber =
+        Number(
+            document.getElementById("dsaAttempt").value
+        );
+
+
+    if (
+        !question ||
+        !topic ||
+        !timeTaken ||
+        !attemptNumber
+    ) {
+
+        document.getElementById("dsaMessage").innerText =
+            "Please fill all fields.";
+
+        return;
+    }
+
+
+    const response = await fetch(
+        "/dsa/attempts",
+        {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+
+            body: JSON.stringify({
+
+                student_id: studentId,
+                question: question,
+                topic: topic,
+                difficulty: difficulty,
+                status: status,
+                time_taken_minutes: timeTaken,
+                attempt_number: attemptNumber
+
+            })
+
+        }
+    );
+
+
+    const data = await response.json();
+
+
+    if (!response.ok) {
+
+        document.getElementById("dsaMessage").innerText =
+            data.detail || "Failed to save attempt.";
+
+        return;
+    }
+
+
+    document.getElementById("dsaMessage").innerText =
+        "✅ DSA attempt saved successfully!";
+
+
+    setTimeout(() => {
+
+        showDSA();
+
+    }, 700);
+}
+async function showStudyPlan() {
+
+    const token =
+        localStorage.getItem("careerpilot_token");
+
+    if (!token) {
+        showLogin();
+        return;
+    }
+
+    try {
+
+        const dashboardResponse = await fetch(
+            "/dashboard",
+            {
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            }
+        );
+
+        const dashboard =
+            await dashboardResponse.json();
+
+        if (!dashboardResponse.ok || !dashboard.student) {
+            alert("Student profile not found.");
+            return;
+        }
+
+        const studentId =
+            dashboard.student.id;
+
+
+        const planResponse = await fetch(
+            `/students/${studentId}/study-plan`,
+            {
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            }
+        );
+
+
+        const planData =
+            await planResponse.json();
+
+
+        if (!planResponse.ok) {
+            alert(
+                planData.detail ||
+                "Unable to load study plan."
+            );
+            return;
+        }
+
+
+        const plan =
+            planData.plan || planData;
+
+
+        let planHTML = "";
+
+
+        if (Array.isArray(plan)) {
+
+            planHTML = plan.map((item, index) => `
+
+                <div class="profile-row">
+
+                    <span>
+                        <strong>
+                            Day ${index + 1}
+                        </strong>
+                        <br>
+
+                        <small>
+                            ${
+                                item.subject ||
+                                item.topic ||
+                                item.task ||
+                                "Study Session"
+                            }
+                        </small>
+                    </span>
+
+                    <strong>
+                        ${
+                            item.hours ||
+                            item.duration ||
+                            ""
+                        }
+                    </strong>
+
+                </div>
+
+            `).join("");
+
+        } else {
+
+            planHTML = Object.entries(plan)
+                .map(([key, value]) => `
+
+                    <div class="profile-row">
+
+                        <span>
+                            <strong>
+                                ${key}
+                            </strong>
+                        </span>
+
+                        <strong>
+                            ${
+                                typeof value === "object"
+                                ? JSON.stringify(value)
+                                : value
+                            }
+                        </strong>
+
+                    </div>
+
+                `)
+                .join("");
+        }
+
+
+        app.innerHTML = `
+
+            <div class="navbar">
+
+                <div class="logo">
+                    CareerPilot <span>AI</span>
+                </div>
+
+                <div class="user-area">
+
+                    <span>Study Plan</span>
+
+                    <button
+                        class="logout"
+                        onclick="loadDashboard()">
+                        Dashboard
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="layout">
+
+                <aside class="sidebar">
+
+                    <h3>CareerPilot</h3>
+
+                    <div class="menu"
+                         onclick="loadDashboard()">
+                        🏠 Dashboard
+                    </div>
+
+                    <div class="menu">
+                        🎯 Career Roadmap
+                    </div>
+
+                    <div class="menu">
+                        🧠 DSA Practice
+                    </div>
+
+                    <div class="menu active">
+                        📚 Study Plan
+                    </div>
+
+                    <div class="menu">
+                        💼 Job Applications
+                    </div>
+
+                    <div class="menu">
+                        📊 Readiness Score
+                    </div>
+
+                    <div class="menu">
+                        👤 Profile
+                    </div>
+
+                </aside>
+
+
+                <main class="main">
+
+                    <div class="welcome">
+
+                        <h1>📚 Your Study Plan</h1>
+
+                        <p>
+                            A personalized preparation plan
+                            based on your career goal and study time.
+                        </p>
+
+                    </div>
+
+
+                    <div class="cards">
+
+                        <div class="card">
+
+                            <div class="card-title">
+                                Target Role
+                            </div>
+
+                            <div class="card-value"
+                                 style="font-size:19px;">
+                                ${dashboard.student.target_role}
+                            </div>
+
+                        </div>
+
+
+                        <div class="card">
+
+                            <div class="card-title">
+                                Daily Study Time
+                            </div>
+
+                            <div class="card-value">
+                                ${dashboard.student.daily_study_hours} hrs
+                            </div>
+
+                        </div>
+
+
+                        <div class="card">
+
+                            <div class="card-title">
+                                Focus
+                            </div>
+
+                            <div class="card-value"
+                                 style="font-size:19px;">
+                                DSA + CS
+                            </div>
+
+                        </div>
+
+
+                        <div class="card">
+
+                            <div class="card-title">
+                                Goal
+                            </div>
+
+                            <div class="card-value"
+                                 style="font-size:19px;">
+                                Job Ready
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="panel">
+
+                        <h2>🗓️ Weekly Preparation Plan</h2>
+
+                        <div style="margin-top:20px;">
+
+                            ${planHTML}
+
+                        </div>
+
+                    </div>
+
+                </main>
+
+            </div>
+        `;
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Unable to load Study Plan.");
+
+    }
+}
+async function showJobs() {
+
+    const token =
+        localStorage.getItem("careerpilot_token");
+
+    if (!token) {
+        showLogin();
+        return;
+    }
+
+    try {
+
+        const dashboardResponse = await fetch(
+            "/dashboard",
+            {
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            }
+        );
+
+        const dashboard =
+            await dashboardResponse.json();
+
+        if (!dashboardResponse.ok || !dashboard.student) {
+            alert("Student profile not found.");
+            return;
+        }
+
+        const studentId = dashboard.student.id;
+
+        const jobsResponse = await fetch(
+            `/students/${studentId}/jobs`,
+            {
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            }
+        );
+
+        const jobsData =
+            await jobsResponse.json();
+
+        if (!jobsResponse.ok) {
+            alert(
+                jobsData.detail ||
+                "Unable to load job applications."
+            );
+            return;
+        }
+
+        const jobs =
+            jobsData.applications ||
+            jobsData.jobs ||
+            jobsData ||
+            [];
+
+        const jobList =
+            Array.isArray(jobs) ? jobs : [];
+
+        app.innerHTML = `
+
+            <div class="navbar">
+
+                <div class="logo">
+                    CareerPilot <span>AI</span>
+                </div>
+
+                <div class="user-area">
+
+                    <span>Job Applications</span>
+
+                    <button
+                        class="logout"
+                        onclick="loadDashboard()">
+                        Dashboard
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="layout">
+
+                <aside class="sidebar">
+
+                    <h3>CareerPilot</h3>
+
+                    <div class="menu"
+                         onclick="loadDashboard()">
+                        🏠 Dashboard
+                    </div>
+
+                    <div class="menu">
+                        🎯 Career Roadmap
+                    </div>
+
+                    <div class="menu">
+                        🧠 DSA Practice
+                    </div>
+
+                    <div class="menu">
+                        📚 Study Plan
+                    </div>
+
+                    <div class="menu active">
+                        💼 Job Applications
+                    </div>
+
+                    <div class="menu">
+                        📊 Readiness Score
+                    </div>
+
+                    <div class="menu">
+                        👤 Profile
+                    </div>
+
+                </aside>
+
+
+                <main class="main">
+
+                    <div class="welcome">
+
+                        <h1>💼 Job Applications</h1>
+
+                        <p>
+                            Track your applications and
+                            interview journey in one place.
+                        </p>
+
+                    </div>
+
+
+                    <div class="cards">
+
+                        <div class="card">
+                            <div class="card-title">
+                                Total Applications
+                            </div>
+
+                            <div class="card-value">
+                                ${jobList.length}
+                            </div>
+                        </div>
+
+
+                        <div class="card">
+                            <div class="card-title">
+                                Applied
+                            </div>
+
+                            <div class="card-value">
+                                ${
+                                    jobList.filter(
+                                        j => j.status === "Applied"
+                                    ).length
+                                }
+                            </div>
+                        </div>
+
+
+                        <div class="card">
+                            <div class="card-title">
+                                Interviews
+                            </div>
+
+                            <div class="card-value">
+                                ${
+                                    jobList.filter(
+                                        j => j.status === "Interview"
+                                    ).length
+                                }
+                            </div>
+                        </div>
+
+
+                        <div class="card">
+                            <div class="card-title">
+                                Selected
+                            </div>
+
+                            <div class="card-value">
+                                ${
+                                    jobList.filter(
+                                        j => j.status === "Selected"
+                                    ).length
+                                }
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="panel">
+
+                        <h2>➕ Add Job Application</h2>
+
+                        <input
+                            id="jobCompany"
+                            class="input"
+                            placeholder="Company name"
+                        >
+
+                        <input
+                            id="jobRole"
+                            class="input"
+                            placeholder="Job role"
+                        >
+
+                        <select
+                            id="jobStatus"
+                            class="input">
+
+                            <option value="Applied">
+                                Applied
+                            </option>
+
+                            <option value="Interview">
+                                Interview
+                            </option>
+
+                            <option value="Selected">
+                                Selected
+                            </option>
+
+                            <option value="Rejected">
+                                Rejected
+                            </option>
+
+                        </select>
+
+
+                        <input
+                            id="jobDate"
+                            class="input"
+                            type="date"
+                        >
+
+                        <input
+                            id="jobNotes"
+                            class="input"
+                            placeholder="Notes"
+                        >
+
+
+                        <button
+                            class="login-btn"
+                            onclick="addJobApplication()">
+
+                            Save Application
+
+                        </button>
+
+                        <div
+                            id="jobMessage"
+                            style="margin-top:15px;">
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="panel"
+                        style="margin-top:20px;">
+
+                        <h2>📋 Application History</h2>
+
+                        <div id="jobHistory">
+
+                            ${
+                                jobList.length === 0
+
+                                ? `
+                                    <p style="color:#6b7280;">
+                                        No job applications yet.
+                                    </p>
+                                  `
+
+                                : jobList.map(job => `
+
+                                    <div class="profile-row">
+
+                                        <span>
+
+                                            <strong>
+                                                ${
+                                                    job.company ||
+                                                    "Company"
+                                                }
+                                            </strong>
+
+                                            <br>
+
+                                            <small>
+                                                ${
+                                                    job.role ||
+                                                    "Role"
+                                                }
+                                                ·
+                                                ${
+                                                    job.status ||
+                                                    "Status"
+                                                }
+                                            </small>
+
+                                        </span>
+
+                                        <strong>
+                                            ${
+                                                job.status ||
+                                                "Applied"
+                                            }
+                                        </strong>
+
+                                    </div>
+
+                                `).join("")
+                            }
+
+                        </div>
+
+                    </div>
+
+                </main>
+
+            </div>
+        `;
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Unable to load Job Applications.");
+
+    }
+}
+
+
+async function addJobApplication() {
+
+    const token =
+        localStorage.getItem("careerpilot_token");
+
+    const dashboardResponse = await fetch(
+        "/dashboard",
+        {
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        }
+    );
+
+    const dashboard =
+        await dashboardResponse.json();
+
+    if (!dashboard.student) {
+        alert("Student profile not found.");
+        return;
+    }
+
+    const studentId =
+        dashboard.student.id;
+
+    const company =
+        document.getElementById("jobCompany").value;
+
+    const role =
+        document.getElementById("jobRole").value;
+
+    const status =
+        document.getElementById("jobStatus").value;
+
+    const appliedDate =
+        document.getElementById("jobDate").value;
+
+    const notes =
+        document.getElementById("jobNotes").value;
+
+
+    if (!company || !role) {
+
+        document.getElementById("jobMessage").innerText =
+            "Please enter company and role.";
+
+        return;
+    }
+
+
+    const response = await fetch(
+        "/jobs/applications",
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+
+            body: JSON.stringify({
+
+                student_id: studentId,
+                company: company,
+                role: role,
+                status: status,
+                applied_date: appliedDate,
+                notes: notes
+
+            })
+        }
+    );
+
+
+    const data =
+        await response.json();
+
+
+    if (!response.ok) {
+
+        document.getElementById("jobMessage").innerText =
+            data.detail ||
+            "Failed to save application.";
+
+        return;
+    }
+
+
+    document.getElementById("jobMessage").innerText =
+        "✅ Application saved successfully!";
+
+
+    setTimeout(() => {
+
+        showJobs();
+
+    }, 700);
+}
+async function showReadiness() {
+
+    const token = localStorage.getItem("careerpilot_token");
+
+    if (!token) {
+        showLogin();
+        return;
+    }
+
+    const dashboardResponse = await fetch("/dashboard", {
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    });
+
+    if (!dashboardResponse.ok) {
+        logout();
+        return;
+    }
+
+    const dashboard = await dashboardResponse.json();
+
+    const studentId = dashboard.student.id;
+
+    const readinessResponse = await fetch(
+        `/students/${studentId}/readiness`
+    );
+
+    const readiness = await readinessResponse.json();
+
+    document.getElementById("app").innerHTML = `
+
+        <div class="page-header">
+            <h1>📊 Career Readiness Score</h1>
+            <p>Track how prepared you are for your target role.</p>
+        </div>
+
+        <div class="cards">
+
+            <div class="card">
+                <h3>Overall Score</h3>
+                <div class="big-number">
+                    ${readiness.career_readiness_score || 0}%
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>DSA</h3>
+                <div class="big-number">
+                    ${readiness.score_breakdown?.DSA || 0}%
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Projects & Backend</h3>
+                <div class="big-number">
+                    ${readiness.score_breakdown?.["Projects & Backend"] || 0}%
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Core CS</h3>
+                <div class="big-number">
+                    ${readiness.score_breakdown?.["Core CS"] || 0}%
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Career Preparation</h3>
+                <div class="big-number">
+                    ${readiness.score_breakdown?.["Career Preparation"] || 0}%
+                </div>
+            </div>
+
+        </div>
+
+        <div class="panel">
+
+            <h2>🎯 Your Readiness</h2>
+
+            <p>
+                Target Role:
+                <strong>${dashboard.student.target_role}</strong>
+            </p>
+
+            <p>
+                Target Company:
+                <strong>${dashboard.student.target_company || "Not specified"}</strong>
+            </p>
+
+            <div style="margin-top:25px;">
+
+                <div style="
+                    background:#e5e7eb;
+                    border-radius:10px;
+                    height:20px;
+                    overflow:hidden;
+                ">
+
+                    <div style="
+                        width:${readiness.career_readiness_score || 0}%;
+                        height:100%;
+                        background:#2563eb;
+                    "></div>
+
+                </div>
+
+            </div>
+
+        </div>
+    `;
+}
+function logout() {
+
+    localStorage.removeItem("careerpilot_token");
+
+    showLogin();
+}
+
+
+loadDashboard();
+
+</script>
+
+</body>
+</html>

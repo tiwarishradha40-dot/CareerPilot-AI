@@ -1,7 +1,16 @@
 import sqlite3
+import os
+from datetime import datetime, timedelta, timezone
+
+from fastapi import FastAPI, HTTPException, Query, Depends
+from fastapi.staticfiles import StaticFiles
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from jose import jwt, JWTError
+from pydantic import BaseModel, Field
+import sqlite3
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
-
+from fastapi.responses import FileResponse
 
 # =========================================================
 # APP
@@ -12,7 +21,7 @@ app = FastAPI(
     description="Backend API for AI Career and Student Preparation Platform",
     version="1.0.0"
 )
-
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # =========================================================
 # DATABASE CONNECTION
@@ -2300,3 +2309,296 @@ def login_user(user: UserLogin):
         "email": existing_user["email"]
 
     }
+# =========================
+# JWT AUTHENTICATION
+# =========================
+
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+
+if not JWT_SECRET_KEY:
+    raise RuntimeError("JWT_SECRET_KEY environment variable is not set")
+
+JWT_ALGORITHM = "HS256"
+JWT_EXPIRE_MINUTES = 60
+
+security = HTTPBearer()
+
+
+def create_access_token(user_id: int, email: str):
+    expire = datetime.now(timezone.utc) + timedelta(
+        minutes=JWT_EXPIRE_MINUTES
+    )
+
+    payload = {
+        "sub": str(user_id),
+        "email": email,
+        "exp": expire,
+    }
+
+    return jwt.encode(
+        payload,
+        JWT_SECRET_KEY,
+        algorithm=JWT_ALGORITHM
+    )
+
+
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    token = credentials.credentials
+
+    try:
+        payload = jwt.decode(
+            token,
+            JWT_SECRET_KEY,
+            algorithms=[JWT_ALGORITHM]
+        )
+
+        user_id = payload.get("sub")
+        email = payload.get("email")
+
+        if not user_id or not email:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid authentication token"
+            )
+
+        return {
+            "user_id": int(user_id),
+            "email": email
+        }
+
+    except JWTError:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or expired authentication token"
+        )
+
+
+@app.post("/auth/token")
+def generate_token(user: UserLogin):
+    conn = get_connection()
+
+    existing_user = conn.execute(
+        "SELECT * FROM users WHERE email = ?",
+        (user.email,)
+    ).fetchone()
+
+    conn.close()
+
+    if not existing_user:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid email or password"
+        )
+
+    if not verify_password(
+        user.password,
+        existing_user["password_hash"]
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid email or password"
+        )
+
+    access_token = create_access_token(
+        existing_user["id"],
+        existing_user["email"]
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer"
+    }
+
+
+@app.get("/auth/me")
+def get_my_profile(
+    current_user: dict = Depends(get_current_user)
+):
+    return {
+        "message": "Authentication successful",
+        "user": current_user
+    }
+# =========================
+# STUDENT USER LINK + DASHBOARD
+# =========================
+
+def add_user_id_to_students():
+    conn = get_connection()
+
+    columns = conn.execute(
+        "PRAGMA table_info(students)"
+    ).fetchall()
+
+    column_names = [column["name"] for column in columns]
+
+    if "user_id" not in column_names:
+        conn.execute(
+            "ALTER TABLE students ADD COLUMN user_id INTEGER"
+        )
+        conn.commit()
+
+    conn.close()
+
+
+add_user_id_to_students()
+
+
+@app.get("/dashboard")
+def get_dashboard(
+    current_user: dict = Depends(get_current_user)
+):
+    conn = get_connection()
+
+    student = conn.execute(
+        """
+        SELECT *
+        FROM students
+        WHERE user_id = ?
+        LIMIT 1
+        """,
+        (current_user["user_id"],)
+    ).fetchone()
+
+    if not student:
+        conn.close()
+
+        return {
+            "message": "Student profile not created yet",
+            "user": current_user,
+            "next_step": "Create your student profile"
+        }
+
+    student_id = student["id"]
+
+    dsa_summary = conn.execute(
+        """
+        SELECT
+            COUNT(*) AS total_attempts,
+            SUM(CASE WHEN status = 'Solved' THEN 1 ELSE 0 END) AS solved
+        FROM dsa_attempts
+        WHERE student_id = ?
+        """,
+        (student_id,)
+    ).fetchone()
+
+    jobs_summary = conn.execute(
+        """
+        SELECT
+            COUNT(*) AS total_applications,
+            SUM(CASE WHEN status = 'Applied' THEN 1 ELSE 0 END) AS applied,
+            SUM(CASE WHEN status = 'Interview' THEN 1 ELSE 0 END) AS interviews,
+            SUM(CASE WHEN status = 'Selected' THEN 1 ELSE 0 END) AS selected
+        FROM job_applications
+        WHERE student_id = ?
+        """,
+        (student_id,)
+    ).fetchone()
+
+    conn.close()
+
+    return {
+        "user": {
+            "id": current_user["user_id"],
+            "email": current_user["email"]
+        },
+        "student": {
+            "id": student["id"],
+            "name": student["name"],
+            "degree": student["degree"],
+            "branch": student["branch"],
+            "graduation_year": student["graduation_year"],
+            "skills": student["skills"],
+            "target_role": student["target_role"],
+            "target_company": student["target_company"],
+            "daily_study_hours": student["daily_study_hours"]
+        },
+        "dsa": {
+            "total_attempts": dsa_summary["total_attempts"] or 0,
+            "solved": dsa_summary["solved"] or 0
+        },
+        "jobs": {
+            "total_applications": jobs_summary["total_applications"] or 0,
+            "applied": jobs_summary["applied"] or 0,
+            "interviews": jobs_summary["interviews"] or 0,
+            "selected": jobs_summary["selected"] or 0
+        }
+    }
+# =========================
+# LOGGED-IN STUDENT PROFILE
+# =========================
+
+@app.post("/profile")
+def create_my_profile(
+    student: Student,
+    current_user: dict = Depends(get_current_user)
+):
+    conn = get_connection()
+
+    # Check if this user already has a profile
+    existing_profile = conn.execute(
+        """
+        SELECT id
+        FROM students
+        WHERE user_id = ?
+        LIMIT 1
+        """,
+        (current_user["user_id"],)
+    ).fetchone()
+
+    if existing_profile:
+        conn.close()
+
+        raise HTTPException(
+            status_code=400,
+            detail="Student profile already exists"
+        )
+
+    cursor = conn.execute(
+        """
+        INSERT INTO students (
+            user_id,
+            name,
+            degree,
+            branch,
+            graduation_year,
+            skills,
+            target_role,
+            target_company,
+            daily_study_hours
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            current_user["user_id"],
+            student.name,
+            student.degree,
+            student.branch,
+            student.graduation_year,
+            student.skills,
+            student.target_role,
+            student.target_company,
+            student.daily_study_hours
+        )
+    )
+
+    conn.commit()
+
+    profile_id = cursor.lastrowid
+
+    conn.close()
+
+    return {
+        "message": "Student profile created successfully",
+        "profile_id": profile_id,
+        "user_id": current_user["user_id"],
+        "profile": student.model_dump()
+    }
+# =========================
+# CAREERPILOT WEBSITE
+# =========================
+
+@app.get("/website")
+def serve_website():
+    return FileResponse("static/index.html")
